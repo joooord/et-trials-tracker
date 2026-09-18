@@ -99,6 +99,17 @@ body {
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 a:hover { text-decoration-thickness: 2px; }
 
+/* Glossary term links: same colour as the text, a quiet dotted rule, so they
+   read as definitions rather than as navigation. */
+a.term {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--rule-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a.term:hover { text-decoration-color: var(--accent); text-decoration-style: solid; }
+
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 .skip {

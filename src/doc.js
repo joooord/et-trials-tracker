@@ -78,7 +78,7 @@ function linkTerms(nodes, state) {
       if (!best) break;
       if (best.index > 0) out.push({ type: 'text', value: rest.slice(0, best.index) });
       out.push({
-        type: 'link', label: best.text, href: '/glossary#' + best.slug,
+        type: 'link', label: best.text, href: '/glossary#' + best.slug, term: true,
         abbr: best.abbr && best.text.indexOf(best.abbr[0]) === 0 ? best.abbr : null,
       });
       state.linked.add(best.slug);
@@ -142,7 +142,7 @@ function htmlInline(nodes) {
   return nodes.map((n) => {
     switch (n.type) {
       case 'text': return escapeHtml(n.value);
-      case 'link': return `<a href="${escapeHtml(n.href)}">${n.abbr
+      case 'link': return `<a href="${escapeHtml(n.href)}"${n.term ? ' class="term" title="Defined in the glossary"' : ''}>${n.abbr
         ? `<abbr title="${escapeHtml(n.abbr[1])}">${escapeHtml(n.abbr[0])}</abbr>` +
           escapeHtml(n.label.slice(n.abbr[0].length))
         : escapeHtml(n.label)}</a>`;
