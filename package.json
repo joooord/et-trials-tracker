@@ -1,0 +1,11 @@
+{
+  "name": "et-trials-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A public tracker of results reporting for interventional clinical trials in essential tremor.",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.js",
+    "check": "node check.js"
+  }
+}
