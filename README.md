@@ -20,30 +20,52 @@ npm run build     # writes dist/, then verifies it
 npm run check     # verifies an existing dist/ on its own
 ```
 
-`build.js` reads `data/*.csv`, computes every figure, writes the four pages plus
-the stylesheet, the script and copies of the data files into `dist/`, and then
-runs `check.js`. No statistic anywhere in the site is hard coded: change the data
-and the pages follow.
+`build.js` reads `data/*.csv`, computes every figure, and writes into `dist/`:
+five HTML pages, a markdown twin of each, the stylesheet, the script, copies of
+the two data files, `data.json`, `llms.txt`, `robots.txt` and `sitemap.xml`. It
+then runs `check.js`. No statistic anywhere in the site is hard coded: change the
+data and the pages follow.
+
+Each page is written once as a list of blocks in `src/pages.js` and rendered
+twice, as HTML and as markdown, from the same prepared tree. The two cannot
+drift.
 
 `check.js` recomputes the headline figures straight from the CSV files,
 independently of the build, and compares them against the numbers present in the
-built `dist/index.html`. It also checks the house style rules. A mismatch fails
-the build.
+built pages and in `data.json`. It also checks the canonical sentence, the
+anchors, the structured data, the markdown twins, the sitemap and the house style
+rules. A mismatch fails the build.
+
+The rules the site is built to are in `DESIGN.md`.
 
 ## Layout
 
 ```
+DESIGN.md           the rules the site is built to
 build.js            build entry point
-check.js            recomputes the figures and verifies the built pages
+check.js            recomputes the figures and verifies the built site
 data/               the two source CSV files, the only thing that changes weekly
 src/csv.js          RFC 4180 CSV reader
-src/stats.js        every figure on the site, computed from the two files
-src/layout.js       page shell, header, navigation, footer
-src/pages.js        the four page bodies
+src/util.js         number and date formatting
+src/stats.js        every figure on the site, including the canonical sentence
+src/glossary.js     every defined term, its definition and its match phrases
+src/doc.js          the block model, the glossary linker, the HTML and markdown renderers
+src/layout.js       page shell, structured data, header, navigation, footer
+src/pages.js        the five page bodies
+src/machine.js      data.json, llms.txt, robots.txt, sitemap.xml
 src/styles.css      the one stylesheet
-src/app.js          table sorting and filtering, chart tooltip
+src/app.js          table sorting and filtering, added to a page already complete
 dist/               build output, not committed
 ```
+
+## For machines
+
+Every page has a markdown twin at the same path with a `.md` suffix, advertised
+in the page head with `rel="alternate"`. `/llms.txt` indexes the site in the
+llmstxt.org format. `/data.json` carries every computed figure and every trial
+row. Every page carries `WebSite`, `WebPage` and two `Dataset` objects as
+JSON-LD, and the tracker page also carries a `FAQPage`. `/robots.txt` allows
+every crawler and names the AI fleets explicitly.
 
 ## Data
 
