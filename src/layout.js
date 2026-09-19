@@ -4,7 +4,7 @@
 
 const { escapeHtml } = require('./util');
 
-const SITE = 'https://et-trials-tracker.vercel.app';
+const SITE = 'https://et-trials-tracker.xyz';
 const REPO = 'https://github.com/joooord/et-trials-tracker';
 const LICENCE = 'https://creativecommons.org/licenses/by/4.0/';
 const AUTHOR = 'Jordan Pitts';

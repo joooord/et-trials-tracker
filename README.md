@@ -8,7 +8,8 @@ did not, whether a results publication could be located in the literature.
 The site presents data and method. It is a literature linkage audit, not a
 determination of anyone's reporting obligation, and it singles nobody out.
 
-Live site: deployed from `main` on Vercel.
+Live site: <https://et-trials-tracker.xyz>, deployed from `main` on Vercel.
+The Vercel address and the typo domain et-trails-tracker.xyz redirect to it.
 Repository: <https://github.com/joooord/et-trials-tracker>
 
 ## Build

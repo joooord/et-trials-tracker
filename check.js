@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { parseCsv } = require('./src/csv');
 const { num } = require('./src/util');
+const { SITE } = require('./src/layout');
 
 const ROOT = __dirname;
 const DIST = path.join(ROOT, 'dist');
@@ -388,9 +389,9 @@ PAGES.forEach((p) => {
 
   check(html.includes('<meta name="twitter:card" content="summary_large_image">'),
     `dist/${p.html} does not declare the large share card`);
-  check(html.includes(`<meta property="og:image" content="https://et-trials-tracker.vercel.app/og.png">`),
+  check(html.includes(`<meta property="og:image" content="${SITE}/og.png">`),
     `dist/${p.html} does not point at the share image by absolute URL`);
-  check(html.includes(`<meta property="og:url" content="https://et-trials-tracker.vercel.app${p.path}">`),
+  check(html.includes(`<meta property="og:url" content="${SITE}${p.path}">`),
     `dist/${p.html} does not carry its own absolute og:url`);
   check(description && html.includes(`<meta property="og:description" content="${description}">`),
     `dist/${p.html} og:description is not the page's meta description`);
@@ -408,7 +409,7 @@ PAGES.forEach((p) => {
   check((html.match(/<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: (light|dark)\)">/g) || []).length === 2,
     `dist/${p.html} does not set a theme colour for both light and dark`);
 
-  check(html.includes(`<link rel="canonical" href="https://et-trials-tracker.vercel.app${p.path}">`),
+  check(html.includes(`<link rel="canonical" href="${SITE}${p.path}">`),
     `dist/${p.html} has no canonical link for ${p.path}`);
   check(html.includes('<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">'),
     `dist/${p.html} does not tell crawlers to index and follow`);
@@ -424,7 +425,7 @@ PAGES.forEach((p) => {
     });
   ['WebSite', 'WebPage'].forEach((type) => {
     const object = graph.find((x) => x['@type'] === type);
-    check(object && object.image === 'https://et-trials-tracker.vercel.app/og.png',
+    check(object && object.image === SITE + '/og.png',
       `dist/${p.html} ${type} JSON-LD carries no image`);
   });
 });

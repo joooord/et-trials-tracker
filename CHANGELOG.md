@@ -17,6 +17,11 @@ Site change. The data is untouched, and every figure is the one recorded below.
   structured data.
 - `check.js` verifies those tags, the presence of every static file, and the
   pixel size of every image the site ships.
+- The site moved to <https://et-trials-tracker.xyz>. Every canonical URL,
+  share tag, sitemap entry, `llms.txt` link and `data.json` link now uses it.
+  The old Vercel address redirects permanently. `vercel.json` also sets
+  security headers, caching for images, and open CORS on the data files so
+  a browser based tool can read them directly.
 
 ## 2026-09-18
 
