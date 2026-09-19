@@ -22,9 +22,9 @@ npm run check     # verifies an existing dist/ on its own
 
 `build.js` reads `data/*.csv`, computes every figure, and writes into `dist/`:
 five HTML pages, a markdown twin of each, the stylesheet, the script, copies of
-the two data files, `data.json`, `llms.txt`, `robots.txt` and `sitemap.xml`. It
-then runs `check.js`. No statistic anywhere in the site is hard coded: change the
-data and the pages follow.
+the two data files, `data.json`, `llms.txt`, `robots.txt`, `sitemap.xml` and
+every file in `static/`. It then runs `check.js`. No statistic anywhere in the
+site is hard coded: change the data and the pages follow.
 
 Each page is written once as a list of blocks in `src/pages.js` and rendered
 twice, as HTML and as markdown, from the same prepared tree. The two cannot
@@ -55,8 +55,31 @@ src/pages.js        the five page bodies
 src/machine.js      data.json, llms.txt, robots.txt, sitemap.xml
 src/styles.css      the one stylesheet
 src/app.js          table sorting and filtering, added to a page already complete
+static/             the icon files, the share image, the web manifest, copied to dist/ as they stand
+tools/              development tools, never run by the build
 dist/               build output, not committed
 ```
+
+## Icon and share image
+
+`static/` holds the icon in every size a browser asks for, the 1200 by 630 share
+image used by `og:image`, the web manifest, and the two SVG files those rasters
+are drawn from. The build copies the whole folder to the root of `dist/` and
+never generates an image, because Vercel runs `node build.js` and nothing else.
+The share image carries the site name, the strapline and one line of
+explanation, in the site's colours and type, and no numbers or dates, so it does
+not go stale when the weekly data update lands.
+
+To redraw the rasters after editing `static/favicon.svg` or `static/og.svg`:
+
+```sh
+npx --yes playwright install chromium
+NODE_PATH=$(npm root -g) node tools/render-images.js
+```
+
+That tool is for development only. It is not a dependency, the build never runs
+it, and the files it writes are committed. `check.js` reads the PNG headers and
+fails the build if any icon or the share image is not the size its tags claim.
 
 ## For machines
 
@@ -65,7 +88,9 @@ in the page head with `rel="alternate"`. `/llms.txt` indexes the site in the
 llmstxt.org format. `/data.json` carries every computed figure and every trial
 row. Every page carries `WebSite`, `WebPage` and two `Dataset` objects as
 JSON-LD, and the tracker page also carries a `FAQPage`. `/robots.txt` allows
-every crawler and names the AI fleets explicitly.
+every crawler and names the AI fleets explicitly. Every page asks to be indexed,
+gives its canonical URL, and carries Open Graph and Twitter card tags whose
+title and description are the page's own title and meta description.
 
 ## Data
 

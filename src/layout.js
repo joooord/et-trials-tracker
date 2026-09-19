@@ -10,6 +10,9 @@ const LICENCE = 'https://creativecommons.org/licenses/by/4.0/';
 const AUTHOR = 'Jordan Pitts';
 const SITE_NAME = 'ET Trials Tracker';
 const STRAPLINE = 'Results reporting for interventional clinical trials in essential tremor.';
+const SHARE_IMAGE = SITE + '/og.png';
+const SHARE_IMAGE_ALT = 'ET Trials Tracker, with the line: results reporting for ' +
+  'interventional clinical trials in essential tremor.';
 
 const NAV = [
   { href: '/', file: 'index.html', label: 'Tracker' },
@@ -88,6 +91,7 @@ function website(stats) {
     name: SITE_NAME,
     url: SITE + '/',
     description: STRAPLINE,
+    image: SHARE_IMAGE,
     inLanguage: 'en-GB',
     creator: person(),
     license: LICENCE,
@@ -102,6 +106,7 @@ function webpage({ path, title, description, stats }) {
     name: title,
     url: SITE + path,
     description,
+    image: SHARE_IMAGE,
     inLanguage: 'en-GB',
     dateModified: stats.dataDate,
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE + '/' },
@@ -145,8 +150,30 @@ function page({ file, path, title, description, markdown, body, stats, questions
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <link rel="canonical" href="${SITE}${path}">
 <link rel="alternate" type="text/markdown" href="${markdown}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${escapeHtml(SITE_NAME)}">
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:url" content="${SITE}${path}">
+<meta property="og:image" content="${SHARE_IMAGE}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${escapeHtml(SHARE_IMAGE_ALT)}">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escapeHtml(title)}">
+<meta name="twitter:description" content="${escapeHtml(description)}">
+<meta name="twitter:image" content="${SHARE_IMAGE}">
+<meta name="twitter:image:alt" content="${escapeHtml(SHARE_IMAGE_ALT)}">
 <link rel="stylesheet" href="/styles.css">
 ${blocks.map(jsonLd).join('\n')}
 </head>
@@ -182,6 +209,6 @@ ${script ? `<script src="${script}" defer></script>\n` : ''}</body>
 }
 
 module.exports = {
-  page, SITE, REPO, LICENCE, AUTHOR, SITE_NAME, STRAPLINE, NAV,
+  page, SITE, REPO, LICENCE, AUTHOR, SITE_NAME, STRAPLINE, SHARE_IMAGE, SHARE_IMAGE_ALT, NAV,
   SEARCH_TECHNIQUE, datasets, website, webpage, faqPage,
 };

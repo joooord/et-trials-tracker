@@ -1,0 +1,18 @@
+{
+  "name": "ET Trials Tracker",
+  "short_name": "ET Trials",
+  "description": "Results reporting for interventional clinical trials in essential tremor.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "lang": "en-GB",
+  "theme_color": "#fcfcfb",
+  "background_color": "#fcfcfb",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/favicon-32.png", "type": "image/png", "sizes": "32x32" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

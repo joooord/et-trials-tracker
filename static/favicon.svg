@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="ET Trials Tracker">
+  <title>ET Trials Tracker</title>
+  <rect width="64" height="64" fill="#1a1a19"/>
+  <text x="32" y="33" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="700" letter-spacing="0.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">ET</text>
+</svg>

@@ -31,6 +31,18 @@ function indent(html) {
   return html.split('\n').map((line) => (line ? '    ' + line : line)).join('\n');
 }
 
+// Everything in static/ is copied to the root of dist/ as it stands. The images
+// there are committed, because Vercel runs `node build.js` and nothing else.
+function copyStatic() {
+  const source = path.join(ROOT, 'static');
+  if (!fs.existsSync(source)) return [];
+  const names = fs.readdirSync(source, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name);
+  names.forEach((name) => write(name, fs.readFileSync(path.join(source, name))));
+  return names;
+}
+
 function build() {
   const registry = readCsv('registry_et_trials.csv');
   const publications = readCsv('publication_status.csv');
@@ -92,6 +104,7 @@ function build() {
   write('llms.txt', machine.llmsTxt(stats));
   write('robots.txt', machine.robotsTxt());
   write('sitemap.xml', machine.sitemapXml(stats));
+  copyStatic();
 
   return stats;
 }

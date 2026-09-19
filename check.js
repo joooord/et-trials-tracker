@@ -296,8 +296,12 @@ function walk(dir) {
 const distFiles = walk(DIST);
 notes.push(`${distFiles.length} files in dist/`);
 
+// Images are bytes, not prose, so they are read as bytes and not scanned.
+const BINARY = ['.png', '.ico'];
+
 distFiles.forEach((file) => {
   const relative = path.relative(DIST, file);
+  if (BINARY.includes(path.extname(file))) return;
   const text = fs.readFileSync(file, 'utf8');
   check(!text.includes(EM_DASH), `dist/${relative} contains an em dash`);
   if (relative.startsWith('data' + path.sep)) return;
@@ -315,6 +319,117 @@ distFiles.forEach((file) => {
 });
 
 check(indexText.includes(`As of ${DATA_DATE_LONG}`), `dist/index.html does not carry "As of ${DATA_DATE_LONG}"`);
+
+// 11. The icon, the share image and the tags that carry them.
+
+const STATIC_FILES = ['favicon.svg', 'favicon.ico', 'favicon-16.png', 'favicon-32.png',
+  'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'og.png', 'og.svg', 'site.webmanifest'];
+
+STATIC_FILES.forEach((name) => {
+  check(fs.existsSync(path.join(DIST, name)), `missing static file: dist/${name}`);
+});
+
+// The share image must be the size the tags claim it is. Width and height are
+// the two big endian 32 bit numbers in the PNG header, which starts at byte 16.
+function pngSize(file) {
+  const bytes = fs.readFileSync(file);
+  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  if (bytes.length < 24 || !bytes.subarray(0, 8).equals(signature)) return null;
+  if (bytes.subarray(12, 16).toString('latin1') !== 'IHDR') return null;
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+}
+
+const ogPath = path.join(DIST, 'og.png');
+if (fs.existsSync(ogPath)) {
+  const size = pngSize(ogPath);
+  check(size && size.width === 1200 && size.height === 630,
+    `dist/og.png is ${size ? size.width + 'x' + size.height : 'not a PNG'}, expected 1200x630`);
+  if (size) notes.push(`og.png: ${size.width}x${size.height}`);
+}
+
+[['favicon-16.png', 16], ['favicon-32.png', 32], ['apple-touch-icon.png', 180],
+  ['icon-192.png', 192], ['icon-512.png', 512]].forEach(([name, side]) => {
+  const target = path.join(DIST, name);
+  if (!fs.existsSync(target)) return;
+  const size = pngSize(target);
+  check(size && size.width === side && size.height === side,
+    `dist/${name} is ${size ? size.width + 'x' + size.height : 'not a PNG'}, expected ${side}x${side}`);
+});
+
+let manifest = null;
+try { manifest = JSON.parse(fs.readFileSync(path.join(DIST, 'site.webmanifest'), 'utf8')); } catch (error) {
+  failures.push('dist/site.webmanifest is not valid JSON: ' + error.message);
+}
+if (manifest) {
+  check(manifest.name === 'ET Trials Tracker', 'site.webmanifest has the wrong name');
+  check(manifest.short_name === 'ET Trials', 'site.webmanifest has the wrong short_name');
+  check(!!manifest.theme_color && !!manifest.background_color,
+    'site.webmanifest has no theme_color or background_color');
+  (manifest.icons || []).forEach((icon) => {
+    check(fs.existsSync(path.join(DIST, icon.src.replace(/^\//, ''))),
+      `site.webmanifest names an icon that is not in dist: ${icon.src}`);
+  });
+  check((manifest.icons || []).length >= 4, 'site.webmanifest lists fewer than four icons');
+}
+
+PAGES.forEach((p) => {
+  const html = built[p.html];
+  const description = (html.match(/<meta name="description" content="([^"]*)">/) || [])[1];
+
+  [['og:title', 'property'], ['og:description', 'property'], ['og:image', 'property'],
+    ['og:type', 'property'], ['og:url', 'property'], ['og:site_name', 'property'],
+    ['og:image:width', 'property'], ['og:image:height', 'property'],
+    ['og:image:alt', 'property'], ['og:locale', 'property'],
+    ['twitter:card', 'name'], ['twitter:title', 'name'], ['twitter:description', 'name'],
+    ['twitter:image', 'name']].forEach(([tag, attribute]) => {
+    check(new RegExp(`<meta ${attribute}="${tag}" content="[^"]+">`).test(html),
+      `dist/${p.html} has no ${tag} meta tag`);
+  });
+
+  check(html.includes('<meta name="twitter:card" content="summary_large_image">'),
+    `dist/${p.html} does not declare the large share card`);
+  check(html.includes(`<meta property="og:image" content="https://et-trials-tracker.vercel.app/og.png">`),
+    `dist/${p.html} does not point at the share image by absolute URL`);
+  check(html.includes(`<meta property="og:url" content="https://et-trials-tracker.vercel.app${p.path}">`),
+    `dist/${p.html} does not carry its own absolute og:url`);
+  check(description && html.includes(`<meta property="og:description" content="${description}">`),
+    `dist/${p.html} og:description is not the page's meta description`);
+  check(description && html.includes(`<meta name="twitter:description" content="${description}">`),
+    `dist/${p.html} twitter:description is not the page's meta description`);
+
+  check(html.includes('<link rel="icon" href="/favicon.svg" type="image/svg+xml">'),
+    `dist/${p.html} has no SVG favicon link`);
+  check(html.includes('<link rel="icon" href="/favicon.ico" sizes="32x32">'),
+    `dist/${p.html} has no favicon.ico link`);
+  check(html.includes('<link rel="apple-touch-icon" href="/apple-touch-icon.png">'),
+    `dist/${p.html} has no apple touch icon link`);
+  check(html.includes('<link rel="manifest" href="/site.webmanifest">'),
+    `dist/${p.html} has no manifest link`);
+  check((html.match(/<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: (light|dark)\)">/g) || []).length === 2,
+    `dist/${p.html} does not set a theme colour for both light and dark`);
+
+  check(html.includes(`<link rel="canonical" href="https://et-trials-tracker.vercel.app${p.path}">`),
+    `dist/${p.html} has no canonical link for ${p.path}`);
+  check(html.includes('<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">'),
+    `dist/${p.html} does not tell crawlers to index and follow`);
+  check(!/noindex|nofollow|none/i.test((html.match(/<meta name="robots"[^>]*>/) || [''])[0]),
+    `dist/${p.html} holds a robots tag that keeps it out of the index`);
+
+  const graph = (built[p.html].match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g) || [])
+    .map((block) => {
+      try {
+        return JSON.parse(block.replace(/^<script[^>]*>/, '').replace(/<\/script>$/, '')
+          .replace(/\\u003c/g, '<'));
+      } catch (error) { return {}; }
+    });
+  ['WebSite', 'WebPage'].forEach((type) => {
+    const object = graph.find((x) => x['@type'] === type);
+    check(object && object.image === 'https://et-trials-tracker.vercel.app/og.png',
+      `dist/${p.html} ${type} JSON-LD carries no image`);
+  });
+});
+
+check(!/noindex/i.test(robots), 'robots.txt tries to keep pages out of the index');
 
 report();
 
